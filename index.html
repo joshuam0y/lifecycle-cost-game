@@ -98,6 +98,7 @@ p{margin:0 0 12px}
 .seg{height:100%;transition:width .25s ease}
 .seg.buyer{background:var(--buyer)}
 .seg.hid{background:repeating-linear-gradient(45deg,var(--hidden),var(--hidden) 6px,color-mix(in srgb,var(--hidden) 70%,#fff) 6px,color-mix(in srgb,var(--hidden) 70%,#fff) 12px)}
+.cdet{font-size:16px;color:var(--muted);margin:-2px 0 6px}
 .crow.best .cname{color:var(--good)}
 .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:15px;color:var(--muted);margin:0 0 12px}
 .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
@@ -174,6 +175,7 @@ var EVENTS = [
   {id:'calm', text:'A calm decade. Prices hold steady.', energy:null, mult:1}
 ];
 
+var WEIGHTS=[{v:0,t:'Ignore it',d:'Only what the university pays'},{v:50,t:'Count half',d:'Real, but the estimates are rough'},{v:100,t:'Count all of it',d:'Treat it like a bill'}];
 var STEP_NAMES = ['Pick','Your bill','Unbilled','Decide'];
 var STAGE_BUTTONS = ['Run it: years 1 to 12','Fix it','Retire it','See my total'];
 
@@ -306,7 +308,7 @@ function hiddenScreen(){
   var order=[optById(state.pick)].concat(OPTIONS.filter(function(x){return x.id!==state.pick;}));
   var i=state.hidIdx||0, o=order[i], last=i===order.length-1;
   var html='<h2>The bill nobody sends</h2>'+
-    '<p class="muted">Real costs the university never pays. Estimates. ('+(i+1)+' of '+order.length+')</p>'+
+    '<p class="muted">Harm to others. The university never pays it. Estimates. ('+(i+1)+' of '+order.length+')</p>'+
     '<section class="card hcard"><h3><span>'+esc(o.name)+(o.id===state.pick?'<span class="tag">Your pick</span>':'')+'</span><span style="color:var(--hidden)">'+fmt(hiddenTotal(o))+'</span></h3>'+
     o.hidden.map(function(r){
       return '<div class="hline"><div class="top"><span>'+esc(r.l)+'</span><b>'+fmt(r.a)+'</b></div>'+
@@ -318,22 +320,26 @@ function hiddenScreen(){
 }
 
 function legendHtml(){
-  return '<div class="legend"><span><i class="sw buyer"></i>University pays</span><span><i class="sw hid"></i>Unbilled, as you count it</span></div>';
+  return '<div class="legend"><span><i class="sw buyer"></i>University pays</span><span><i class="sw hid"></i>Harm to others, as you count it</span></div>';
 }
 
 function decideScreen(){
   state.screen='decide';
   var s=state.decStep||0, html;
   if(s===0){
-    html='<h2>How much should they count?</h2>'+
-      '<p class="muted">Nobody bills the unbilled costs. You decide.</p>'+
-      '<div class="ctl"><div class="lab"><label for="w" style="margin:0">Count them at</label><output id="wout" for="w">'+state.weight+'%</output></div>'+
-      '<input id="w" type="range" min="0" max="100" step="5" value="'+state.weight+'" aria-describedby="whint">'+
-      '<div class="small muted" id="whint">0% ignore, 100% full</div></div>'+
+    html='<h2>Should the harm to others count?</h2>'+
+      '<p class="muted">Fumes, mining, waste. Nobody bills the university for it. You decide.</p>'+
+      '<div class="opts" role="radiogroup" aria-label="How much harm to others counts">'+
+      WEIGHTS.map(function(w){
+        return '<label class="opt"><input type="radio" name="wt" value="'+w.v+'"'+(state.weight===w.v?' checked':'')+'>'+
+          '<span class="face"><span class="nm"><span>'+w.t+'</span></span><span class="ds">'+w.d+'</span></span></label>';
+      }).join('')+'</div>'+
       legendHtml()+'<div id="chart"></div><div class="verdict" id="verdict" aria-live="polite"></div>'+
       '<button class="btn" id="n">Next</button>';
     show(html,4,'h2'); paintChart();
-    on('#w','input',function(e){ state.weight=+e.target.value; app.querySelector('#wout').textContent=state.weight+'%'; paintChart(); });
+    app.querySelectorAll('input[name=wt]').forEach(function(r){
+      r.addEventListener('change',function(){ state.weight=+r.value; paintChart(); });
+    });
     on('#n','click',function(){ state.decStep=1; decideScreen(); });
   } else if(s===1){
     html='<h2>Will the batteries last?</h2>'+
@@ -372,7 +378,7 @@ function drawFinal(){
 
 function verdictText(){
   var order=ranked(totalAt), best=order[0], gap=totalAt(order[1])-totalAt(best);
-  var v='Lowest: '+best.name+', '+fmt(totalAt(best))+'. Next: '+order[1].name+', +'+fmt(gap)+'.';
+  var v='Cheapest overall: '+best.name+', '+fmt(totalAt(best))+'. Next: '+order[1].name+', '+fmt(gap)+' more.';
   if(gap<=Math.round(0.03*totalAt(best))) v+=' Close call.';
   return v;
 }
@@ -384,8 +390,9 @@ function paintChart(){
     chart.innerHTML = OPTIONS.map(function(o){
       var L=ledger(o).total, H=Math.round(hiddenTotal(o)*state.weight/100), T=L+H;
       var bw=Math.max(0,L)/scale*100, hw=H/scale*100;
-      return '<div class="crow'+(o===best?' best':'')+'"><div class="cname"><span>'+esc(o.name)+(o===best?'<span class="tag">Lowest</span>':'')+'</span>'+
+      return '<div class="crow'+(o===best?' best':'')+'"><div class="cname"><span>'+esc(o.name)+(o===best?'<span class="tag">Cheapest</span>':'')+'</span>'+
         '<span class="cval">'+fmt(T)+'</span></div>'+
+        '<div class="cdet">University pays '+fmt(L)+(state.weight?' + harm to others '+fmt(H):'')+'</div>'+
         '<div class="bar" role="img" aria-label="'+esc(o.name)+': university pays '+fmt(L)+', unbilled counted '+fmt(H)+', total '+fmt(T)+'">'+
         '<span class="seg buyer" style="width:'+bw.toFixed(2)+'%"></span><span class="seg hid" style="width:'+hw.toFixed(2)+'%"></span></div></div>';
     }).join('');
@@ -427,9 +434,9 @@ function summaryText(){
     'First pick: '+o.name,
     'What the university pays for it: '+fmt(ledger(o).total)+' over '+YEARS+' years (ranks '+buyerRank+' of 3)',
     'Event in my run: '+state.ev.text,
-    'Unbilled costs counted at: '+state.weight+'%',
+    'Harm to others counted: '+(state.weight===0?'not at all':state.weight===100?'in full':'half'),
     'Electric battery packs: '+(state.battery?'need replacing in year 9':'last all 12 years'),
-    'Lowest total at my settings: '+best.name+' ('+fmt(totalAt(best))+')',
+    'Cheapest overall at my settings: '+best.name+' ('+fmt(totalAt(best))+')',
     'My final choice: '+f.name+(f===o?' (same as first pick)':' (changed from first pick)'),
     'What changed my mind, or why not: '+blank(state.mind),
     'A classmate might disagree because: '+blank(state.disagree),
