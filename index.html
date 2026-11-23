@@ -7,119 +7,118 @@
 <meta name="description" content="A 5 to 10 minute decision game about what things really cost over their whole life.">
 <style>
 :root{
-  --bg:#f5f4ef; --card:#ffffff; --ink:#1c2420; --muted:#5d6a63; --line:#dcdad0;
-  --accent:#1f6f5a; --accent-ink:#ffffff; --accent-soft:#e3f1ec;
-  --buyer:#2d5f93; --hidden:#c4701a; --hidden-soft:#fbeedd; --good:#1f6f5a;
-  --shadow:0 1px 2px rgba(20,30,25,.06),0 4px 14px rgba(20,30,25,.06);
+  --bg:#f2ede2; --card:#fbf8f1; --ink:#221e19; --muted:#6a6358; --line:#d8d0bf;
+  --accent:#221e19; --accent-ink:#f2ede2; --accent-soft:#e8e1cf;
+  --buyer:#2b4a6b; --hidden:#b4532a; --hidden-soft:#f3e0d3; --good:#2f6b3f;
+  --serif:Charter,"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#121815; --card:#1b2420; --ink:#eef2ee; --muted:#a0aca5; --line:#2f3b35;
-    --accent:#58b79b; --accent-ink:#0c1511; --accent-soft:#1d3029;
-    --buyer:#6aa3dc; --hidden:#e29a4d; --hidden-soft:#33261a; --good:#58b79b;
-    --shadow:none;
+    --bg:#191611; --card:#221e18; --ink:#efe8d8; --muted:#a79f8f; --line:#3a342a;
+    --accent:#efe8d8; --accent-ink:#191611; --accent-soft:#2e2819;
+    --buyer:#7fa6cf; --hidden:#e08a5c; --hidden-soft:#3a2418; --good:#7fc08f;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#121815; --card:#1b2420; --ink:#eef2ee; --muted:#a0aca5; --line:#2f3b35;
-  --accent:#58b79b; --accent-ink:#0c1511; --accent-soft:#1d3029;
-  --buyer:#6aa3dc; --hidden:#e29a4d; --hidden-soft:#33261a; --good:#58b79b;
-  --shadow:none;
+  --bg:#191611; --card:#221e18; --ink:#efe8d8; --muted:#a79f8f; --line:#3a342a;
+  --accent:#efe8d8; --accent-ink:#191611; --accent-soft:#2e2819;
+  --buyer:#7fa6cf; --hidden:#e08a5c; --hidden-soft:#3a2418; --good:#7fc08f;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
-.wrap{width:100%;max-width:720px;margin:0 auto;padding:0 16px}
-header.top{padding:16px 0 8px}
-.brand{font-weight:800;letter-spacing:.2px;font-size:15px;color:var(--accent);text-transform:uppercase}
-.steps{list-style:none;display:flex;gap:6px;margin:10px 0 0;padding:0}
-.steps li{flex:1;font-size:13px;color:var(--muted);border-top:4px solid var(--line);padding-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.steps li.done{border-color:var(--accent);color:var(--ink)}
-.steps li.now{border-color:var(--accent);color:var(--ink);font-weight:700}
-main{flex:1;padding:8px 0 28px;outline:none}
-h1{font-size:32px;line-height:1.2;margin:14px 0 10px}
-h2{font-size:28px;line-height:1.25;margin:8px 0 8px;outline:none}
+body{margin:0;background:var(--bg);color:var(--ink);font:18px/1.6 var(--serif);min-height:100vh;display:flex;flex-direction:column}
+.wrap{width:100%;max-width:680px;margin:0 auto;padding:0 20px}
+header.top{padding:20px 0 10px;border-bottom:2px solid var(--ink)}
+.brand{font-weight:700;font-size:17px;font-style:italic;color:var(--ink)}
+.steps{list-style:none;display:flex;gap:14px;margin:8px 0 0;padding:0;font-family:var(--sans)}
+.steps li{font-size:13px;color:var(--muted);white-space:nowrap}
+.steps li.done{color:var(--ink)}
+.steps li.now{color:var(--ink);font-weight:700;text-decoration:underline;text-underline-offset:5px;text-decoration-thickness:2px}
+main{flex:1;padding:18px 0 28px;outline:none}
+h1{font-size:38px;line-height:1.12;margin:18px 0 14px;font-weight:700;letter-spacing:-.5px}
+h2{font-size:30px;line-height:1.15;margin:6px 0 8px;outline:none;font-weight:700;letter-spacing:-.3px}
 h3{font-size:19px;margin:0 0 6px}
-p{margin:0 0 12px}
+p{margin:0 0 14px}
 .lead{font-size:21px}
 .muted{color:var(--muted)}
 .small{font-size:15px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin:0 0 14px}
-.btn{appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-size:19px;font-weight:700;padding:16px 20px;border-radius:14px;cursor:pointer;min-height:58px;width:100%}
-.btn:hover{filter:brightness(1.06)}
-.btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
-.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:16px;margin:0 0 14px}
+.btn{appearance:none;border:2px solid var(--ink);background:var(--accent);color:var(--accent-ink);font:inherit;font-family:var(--sans);font-size:17px;font-weight:700;padding:14px 20px;border-radius:4px;cursor:pointer;min-height:56px;width:100%}
+.btn:hover{opacity:.88}
+.btn:disabled{opacity:.3;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
 .btn.inline{width:auto}
 .row-btns{display:flex;gap:10px;flex-wrap:wrap}
 .row-btns .btn{flex:1;min-width:150px}
 :focus-visible{outline:3px solid var(--buyer);outline-offset:2px}
+h1:focus,h2:focus,main:focus{outline:none}
 
 /* pick cards */
-.opts{display:grid;gap:10px;margin:0 0 14px}
+.opts{display:grid;gap:10px;margin:0 0 16px}
 .opt{display:block;position:relative;cursor:pointer}
 .opt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
-.opt .face{display:block;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:18px 16px;transition:border-color .15s,background .15s}
-.opt input:checked + .face{border-color:var(--accent);background:var(--accent-soft)}
+.opt .face{display:block;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--line);border-radius:4px;padding:16px 16px}
+.opt input:checked + .face{border-color:var(--ink);border-left-color:var(--ink);background:var(--accent-soft)}
 .opt input:focus-visible + .face{outline:3px solid var(--buyer);outline-offset:2px}
 .opt .nm{font-weight:700;font-size:20px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
-.opt .price{font-weight:800;white-space:nowrap}
+.opt .price{font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums}
 .opt .ds{color:var(--muted);font-size:17px;margin-top:2px;display:block}
 
 /* ledger */
-.runtotal{position:sticky;top:0;z-index:2;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline;box-shadow:var(--shadow)}
-.runtotal .lbl{font-size:13px;color:var(--muted)}
-.runtotal .num{font-size:26px;font-weight:800;color:var(--buyer);font-variant-numeric:tabular-nums}
-.group{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 0 10px}
-.group.new{animation:rise .35s ease-out}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.group h3{display:flex;justify-content:space-between;color:var(--buyer);font-size:19px}
-.line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px dashed var(--line);font-size:18px}
-.line b{font-variant-numeric:tabular-nums;white-space:nowrap}
-.event{background:var(--hidden-soft);border-left:5px solid var(--hidden);border-radius:8px;padding:12px 14px;margin:8px 0 0;font-size:17px}
+.runtotal{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--ink);padding:10px 0;margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline}
+.runtotal .lbl{font-size:14px;color:var(--muted);font-family:var(--sans)}
+.runtotal .num{font-size:28px;font-weight:700;color:var(--buyer);font-variant-numeric:tabular-nums}
+.group{padding:10px 0 12px;margin:0 0 6px;border-bottom:1px solid var(--line)}
+.group.new{animation:rise .3s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.group h3{display:flex;justify-content:space-between;color:var(--buyer);font-size:20px}
+.line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;font-size:18px}
+.line b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.event{background:var(--hidden-soft);border-left:4px solid var(--hidden);padding:10px 14px;margin:8px 0 0;font-size:17px;font-style:italic}
 
 .rank{list-style:none;margin:8px 0 0;padding:0}
 .rank li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
-.tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-left:6px;vertical-align:2px}
-.tag.hid{background:var(--hidden-soft);color:var(--hidden)}
+.tag{display:inline-block;font-family:var(--sans);font-size:12px;font-weight:700;color:var(--muted);margin-left:8px;vertical-align:2px;border:1px solid var(--line);padding:1px 6px;border-radius:3px}
+.tag.hid{color:var(--hidden)}
 
 /* hidden cards */
 .hcard h3{display:flex;justify-content:space-between;gap:10px}
-.hline{padding:12px 0;font-size:18px;border-top:1px dashed var(--line)}
+.hline{padding:12px 0;font-size:18px;border-top:1px solid var(--line)}
 .hline .top{display:flex;justify-content:space-between;gap:12px}
 .hline b{color:var(--hidden);font-variant-numeric:tabular-nums;white-space:nowrap}
-.who{font-size:16px;color:var(--muted)}
-.who span{font-weight:700;color:var(--ink)}
+.who{font-size:16px;color:var(--muted);font-style:italic}
+.who span{font-weight:700;color:var(--ink);font-style:normal}
 
 /* chart */
-.crow{margin:0 0 14px}
-.cname{display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:19px;margin-bottom:6px}
+.crow{margin:0 0 16px}
+.cname{display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:19px;margin-bottom:4px}
 .cval{font-variant-numeric:tabular-nums}
-.bar{display:flex;height:32px;border-radius:8px;overflow:hidden;background:var(--line)}
+.bar{display:flex;height:26px;border-radius:2px;overflow:hidden;background:var(--line)}
 .seg{height:100%;transition:width .25s ease}
 .seg.buyer{background:var(--buyer)}
-.seg.hid{background:repeating-linear-gradient(45deg,var(--hidden),var(--hidden) 6px,color-mix(in srgb,var(--hidden) 70%,#fff) 6px,color-mix(in srgb,var(--hidden) 70%,#fff) 12px)}
-.cdet{font-size:16px;color:var(--muted);margin:-2px 0 6px}
+.seg.hid{background:repeating-linear-gradient(45deg,var(--hidden),var(--hidden) 5px,color-mix(in srgb,var(--hidden) 60%,var(--card)) 5px,color-mix(in srgb,var(--hidden) 60%,var(--card)) 10px)}
+.cdet{font-size:16px;color:var(--muted);margin:0 0 6px}
 .crow.best .cname{color:var(--good)}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:15px;color:var(--muted);margin:0 0 12px}
-.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:15px;color:var(--muted);margin:0 0 12px;font-family:var(--sans)}
+.sw{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .sw.buyer{background:var(--buyer)} .sw.hid{background:var(--hidden)}
 .ctl{margin:0 0 16px}
 .ctl label,.ctl .lab{display:flex;justify-content:space-between;font-weight:700;font-size:19px;margin-bottom:8px}
-input[type=range]{width:100%;accent-color:var(--accent);height:40px}
 .seg2{display:flex;gap:8px}
 .seg2 label{flex:1;position:relative;margin:0;display:block;font-weight:600}
 .seg2 input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
-.seg2 .face{display:block;text-align:center;border:2px solid var(--line);border-radius:12px;padding:16px 8px;font-size:17px;background:var(--card)}
-.seg2 input:checked + .face{border-color:var(--accent);background:var(--accent-soft)}
+.seg2 .face{display:block;text-align:center;border:1px solid var(--line);border-bottom:4px solid var(--line);border-radius:4px;padding:16px 8px;font-size:17px;background:var(--card)}
+.seg2 input:checked + .face{border-color:var(--ink);background:var(--accent-soft)}
 .seg2 input:focus-visible + .face{outline:3px solid var(--buyer);outline-offset:2px}
-.verdict{background:var(--accent-soft);border-radius:12px;padding:14px 16px;margin:0 0 18px;font-weight:700;font-size:19px}
+.verdict{border-top:2px solid var(--ink);border-bottom:1px solid var(--line);padding:12px 0;margin:0 0 18px;font-weight:700;font-size:19px}
 
-textarea{width:100%;font:inherit;font-size:18px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card);color:var(--ink);resize:vertical;min-height:72px}
-pre.out{white-space:pre-wrap;word-wrap:break-word;font:15px/1.55 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin:0 0 12px}
-.status{min-height:22px;font-size:14px;color:var(--good);font-weight:700;margin:8px 0 0}
-footer{padding:14px 0 24px;font-size:12px;color:var(--muted);text-align:center}
+textarea{width:100%;font:inherit;font-size:18px;border:1px solid var(--ink);border-radius:4px;padding:10px;background:var(--card);color:var(--ink);resize:vertical;min-height:80px}
+pre.out{white-space:pre-wrap;word-wrap:break-word;font:15px/1.6 ui-monospace,Menlo,Consolas,monospace;background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px;margin:0 0 12px}
+.status{min-height:22px;font-size:14px;color:var(--good);font-weight:700;margin:8px 0 0;font-family:var(--sans)}
+footer{padding:14px 0 24px;font-size:13px;color:var(--muted);text-align:center;font-style:italic}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-@media (max-width:380px){h1{font-size:24px}.steps li{font-size:11px}}
+@media (max-width:380px){h1{font-size:30px}.steps{gap:8px}.steps li{font-size:11px}}
 </style>
 </head>
 <body>
@@ -129,7 +128,7 @@ footer{padding:14px 0 24px;font-size:12px;color:var(--muted);text-align:center}
     <ol class="steps" id="steps" hidden></ol>
   </header>
   <main id="app" tabindex="-1"></main>
-  <footer>Dollar figures are made up for teaching. Nothing is saved or sent.</footer>
+  <footer>Made-up numbers, for class. Nothing is saved or sent.</footer>
 </div>
 <script>
 (function(){
@@ -176,7 +175,7 @@ var EVENTS = [
 ];
 
 var WEIGHTS=[{v:0,t:'Ignore it',d:'Only what the university pays'},{v:50,t:'Count half',d:'Real, but the estimates are rough'},{v:100,t:'Count all of it',d:'Treat it like a bill'}];
-var STEP_NAMES = ['Pick','Your bill','Unbilled','Decide'];
+var STEP_NAMES = ['Pick','The bill','Harm','Decide'];
 var STAGE_BUTTONS = ['Run it: years 1 to 12','Fix it','Retire it','See my total'];
 
 var app = document.getElementById('app');
@@ -244,9 +243,9 @@ function on(sel, ev, fn){ var el=app.querySelector(sel); if(el) el.addEventListe
 function intro(){
   state.screen='intro';
   show(
-    '<h1>What does it really cost?</h1>'+
-    '<p class="lead">10 campus shuttles. 12 years. Pick one.</p>'+
-    '<p class="muted">Then see two bills: the one the university pays, and the one nobody sends.</p>'+
+    '<h1>Which shuttle do we buy?</h1>'+
+    '<p class="lead">The old campus shuttles are done. You have to replace all ten, and whatever you pick has to last twelve years.</p>'+
+    '<p class="muted">First you will see what the university pays. Then you will see what it does not.</p>'+
     '<button class="btn" id="go">Start</button>', 0, 'h1');
   on('#go','click',pickScreen);
 }
@@ -259,7 +258,7 @@ function pickScreen(){
       '<span class="ds">'+esc(o.blurb)+'</span></span></label>';
   }).join('');
   show('<h2>Which will you buy?</h2>'+
-    '<p class="muted">Sticker price for all 10. Which costs least over 12 years?</p>'+
+    '<p class="muted">Sticker price for all ten. Go with your gut.</p>'+
     '<div class="opts" role="radiogroup" aria-label="Shuttle options">'+cards+'</div>'+
     '<button class="btn" id="buy"'+(state.pick?'':' disabled')+'>Buy it</button>', 1);
   app.querySelectorAll('input[name=pick]').forEach(function(r){
@@ -298,7 +297,7 @@ function billScreen(){
       return '<li><span>'+(i+1)+'. '+esc(x.name)+(x===o?'<span class="tag">Your pick</span>':'')+'</span><b>'+fmt(ledger(x).total)+'</b></li>';
     }).join('')+'</ol>'+
     '</div>'+
-    '<button class="btn" id="hid">Next: the bill nobody sends</button>';
+    '<button class="btn" id="hid">Next: what it costs everyone else</button>';
   show(html,2,'h2');
   on('#hid','click',function(){ state.hidIdx=0; hiddenScreen(); });
 }
@@ -308,7 +307,7 @@ function hiddenScreen(){
   var order=[optById(state.pick)].concat(OPTIONS.filter(function(x){return x.id!==state.pick;}));
   var i=state.hidIdx||0, o=order[i], last=i===order.length-1;
   var html='<h2>The bill nobody sends</h2>'+
-    '<p class="muted">Harm to others. The university never pays it. Estimates. ('+(i+1)+' of '+order.length+')</p>'+
+    '<p class="muted">The university never pays these. Other people do. Rough estimates. ('+(i+1)+' of '+order.length+')</p>'+
     '<section class="card hcard"><h3><span>'+esc(o.name)+(o.id===state.pick?'<span class="tag">Your pick</span>':'')+'</span><span style="color:var(--hidden)">'+fmt(hiddenTotal(o))+'</span></h3>'+
     o.hidden.map(function(r){
       return '<div class="hline"><div class="top"><span>'+esc(r.l)+'</span><b>'+fmt(r.a)+'</b></div>'+
@@ -328,7 +327,7 @@ function decideScreen(){
   var s=state.decStep||0, html;
   if(s===0){
     html='<h2>Should the harm to others count?</h2>'+
-      '<p class="muted">Fumes, mining, waste. Nobody bills the university for it. You decide.</p>'+
+      '<p class="muted">Fumes, mining, waste. No one bills the university for it. Does it count?</p>'+
       '<div class="opts" role="radiogroup" aria-label="How much harm to others counts">'+
       WEIGHTS.map(function(w){
         return '<label class="opt"><input type="radio" name="wt" value="'+w.v+'"'+(state.weight===w.v?' checked':'')+'>'+
