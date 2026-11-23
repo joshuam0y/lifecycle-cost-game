@@ -388,7 +388,7 @@ function summaryScreen(){
     '<div class="ctl"><label class="lab" for="dis" style="display:block">A classmate might disagree because...</label><textarea id="dis" maxlength="400"></textarea></div>'+
     '<pre class="out" id="out"></pre>'+
     '<button class="btn" id="copy">Copy summary</button><div class="status" id="status" role="status"></div>'+
-    '<div class="row-btns" style="margin-top:10px"><button class="btn ghost" id="again">Play again</button></div>';
+    '<div class="row-btns" style="margin-top:10px"><button class="btn ghost" id="retry">Try a different pick, same event</button><button class="btn ghost" id="again">Play again, new event</button></div>';
   show(html,4,'h2');
   app.querySelector('#mind').value=state.mind;
   app.querySelector('#dis').value=state.disagree;
@@ -396,6 +396,7 @@ function summaryScreen(){
   on('#mind','input',function(e){ state.mind=e.target.value; paintSummary(); });
   on('#dis','input',function(e){ state.disagree=e.target.value; paintSummary(); });
   on('#copy','click',copySummary);
+  on('#retry','click',function(){ state.pick=null; state.finalPick=null; state.stage=0; pickScreen(); });
   on('#again','click',function(){ state=fresh(); intro(); });
 }
 
