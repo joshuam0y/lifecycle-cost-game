@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Campus Fleet</title>
+<meta name="description" content="A 5 to 10 minute decision game about what things really cost over their whole life.">
+<style>
+:root{
+  --bg:#f5f4ef; --card:#ffffff; --ink:#1c2420; --muted:#5d6a63; --line:#dcdad0;
+  --accent:#1f6f5a; --accent-ink:#ffffff; --accent-soft:#e3f1ec;
+  --buyer:#2d5f93; --hidden:#c4701a; --hidden-soft:#fbeedd; --good:#1f6f5a;
+  --shadow:0 1px 2px rgba(20,30,25,.06),0 4px 14px rgba(20,30,25,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#121815; --card:#1b2420; --ink:#eef2ee; --muted:#a0aca5; --line:#2f3b35;
+    --accent:#58b79b; --accent-ink:#0c1511; --accent-soft:#1d3029;
+    --buyer:#6aa3dc; --hidden:#e29a4d; --hidden-soft:#33261a; --good:#58b79b;
+    --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121815; --card:#1b2420; --ink:#eef2ee; --muted:#a0aca5; --line:#2f3b35;
+  --accent:#58b79b; --accent-ink:#0c1511; --accent-soft:#1d3029;
+  --buyer:#6aa3dc; --hidden:#e29a4d; --hidden-soft:#33261a; --good:#58b79b;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column}
+.wrap{width:100%;max-width:720px;margin:0 auto;padding:0 16px}
+header.top{padding:16px 0 8px}
+.brand{font-weight:800;letter-spacing:.2px;font-size:15px;color:var(--accent);text-transform:uppercase}
+.steps{list-style:none;display:flex;gap:6px;margin:10px 0 0;padding:0}
+.steps li{flex:1;font-size:12px;color:var(--muted);border-top:4px solid var(--line);padding-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.steps li.done{border-color:var(--accent);color:var(--ink)}
+.steps li.now{border-color:var(--accent);color:var(--ink);font-weight:700}
+main{flex:1;padding:8px 0 28px;outline:none}
+h1{font-size:28px;line-height:1.2;margin:14px 0 10px}
+h2{font-size:22px;line-height:1.25;margin:8px 0 8px;outline:none}
+h3{font-size:16px;margin:0 0 6px}
+p{margin:0 0 12px}
+.lead{font-size:17px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow);margin:0 0 14px}
+.btn{appearance:none;border:0;background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:700;padding:14px 20px;border-radius:12px;cursor:pointer;min-height:48px;width:100%}
+.btn:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.inline{width:auto}
+.row-btns{display:flex;gap:10px;flex-wrap:wrap}
+.row-btns .btn{flex:1;min-width:150px}
+:focus-visible{outline:3px solid var(--buyer);outline-offset:2px}
+
+/* pick cards */
+.opts{display:grid;gap:10px;margin:0 0 14px}
+.opt{display:block;position:relative;cursor:pointer}
+.opt input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.opt .face{display:block;background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 16px;transition:border-color .15s,background .15s}
+.opt input:checked + .face{border-color:var(--accent);background:var(--accent-soft)}
+.opt input:focus-visible + .face{outline:3px solid var(--buyer);outline-offset:2px}
+.opt .nm{font-weight:700;font-size:17px;display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.opt .price{font-weight:800;white-space:nowrap}
+.opt .ds{color:var(--muted);font-size:14px;margin-top:2px;display:block}
+
+/* ledger */
+.runtotal{position:sticky;top:0;z-index:2;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline;box-shadow:var(--shadow)}
+.runtotal .lbl{font-size:13px;color:var(--muted)}
+.runtotal .num{font-size:26px;font-weight:800;color:var(--buyer);font-variant-numeric:tabular-nums}
+.group{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:0 0 10px}
+.group.new{animation:rise .35s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.group h3{display:flex;justify-content:space-between;color:var(--buyer)}
+.line{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px dashed var(--line);font-size:15px}
+.line b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.event{background:var(--hidden-soft);border-left:5px solid var(--hidden);border-radius:8px;padding:10px 12px;margin:8px 0 0;font-size:15px}
+
+.rank{list-style:none;margin:8px 0 0;padding:0}
+.rank li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;padding:2px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-left:6px;vertical-align:2px}
+.tag.hid{background:var(--hidden-soft);color:var(--hidden)}
+
+/* hidden cards */
+.hcard h3{display:flex;justify-content:space-between;gap:10px}
+.hline{padding:8px 0;border-top:1px dashed var(--line)}
+.hline .top{display:flex;justify-content:space-between;gap:12px}
+.hline b{color:var(--hidden);font-variant-numeric:tabular-nums;white-space:nowrap}
+.who{font-size:13px;color:var(--muted)}
+.who span{font-weight:700;color:var(--ink)}
+
+/* chart */
+.crow{margin:0 0 14px}
+.cname{display:flex;justify-content:space-between;gap:10px;font-weight:700;margin-bottom:5px}
+.cval{font-variant-numeric:tabular-nums}
+.bar{display:flex;height:26px;border-radius:8px;overflow:hidden;background:var(--line)}
+.seg{height:100%;transition:width .25s ease}
+.seg.buyer{background:var(--buyer)}
+.seg.hid{background:repeating-linear-gradient(45deg,var(--hidden),var(--hidden) 6px,color-mix(in srgb,var(--hidden) 70%,#fff) 6px,color-mix(in srgb,var(--hidden) 70%,#fff) 12px)}
+.crow.best .cname{color:var(--good)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin:0 0 12px}
+.sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.sw.buyer{background:var(--buyer)} .sw.hid{background:var(--hidden)}
+.ctl{margin:0 0 16px}
+.ctl label,.ctl .lab{display:flex;justify-content:space-between;font-weight:700;margin-bottom:6px}
+input[type=range]{width:100%;accent-color:var(--accent);height:32px}
+.seg2{display:flex;gap:8px}
+.seg2 label{flex:1;position:relative;margin:0;display:block;font-weight:600}
+.seg2 input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.seg2 .face{display:block;text-align:center;border:2px solid var(--line);border-radius:10px;padding:10px 8px;font-size:14px;background:var(--card)}
+.seg2 input:checked + .face{border-color:var(--accent);background:var(--accent-soft)}
+.seg2 input:focus-visible + .face{outline:3px solid var(--buyer);outline-offset:2px}
+.verdict{background:var(--accent-soft);border-radius:12px;padding:12px 14px;margin:0 0 16px;font-weight:600}
+
+textarea{width:100%;font:inherit;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card);color:var(--ink);resize:vertical;min-height:72px}
+pre.out{white-space:pre-wrap;word-wrap:break-word;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin:0 0 12px}
+.status{min-height:22px;font-size:14px;color:var(--good);font-weight:700;margin:8px 0 0}
+footer{padding:14px 0 24px;font-size:12px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:380px){h1{font-size:24px}.steps li{font-size:11px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">The Campus Fleet</div>
+    <ol class="steps" id="steps" hidden></ol>
+  </header>
+  <main id="app" tabindex="-1"></main>
+  <footer>Dollar figures are made up for teaching. Nothing is saved or sent.</footer>
+</div>
+<script>
+(function(){
+'use strict';
+
+var YEARS = 12, EVENT_YEAR = 5;
+
+/* All money is in thousands of dollars for the whole fleet of 10 shuttles. */
+var OPTIONS = [
+  { id:'diesel', name:'New diesel shuttles', short:'New diesel',
+    price:1800, priceNote:'$1.80M', blurb:'Familiar. Refuels in minutes.',
+    setup:0, setupLabel:'', energy:'fuel', energyLabel:'Fuel', energyPerYear:150, maint:60,
+    repairs:[{year:8,label:'Engine overhaul',amt:300}],
+    end:{label:'Sold back to a dealer',amt:-150},
+    hidden:[
+      {l:'Fumes near dorms and classrooms',a:720,who:'Students, staff and neighbors (health)'},
+      {l:'Carbon emissions',a:480,who:'Everyone, and future generations'}
+    ]},
+  { id:'electric', name:'Electric shuttles', short:'Electric',
+    price:2600, priceNote:'$2.60M + chargers', blurb:'Plugs in overnight. Needs chargers.',
+    setup:250, setupLabel:'Charging stations installed', energy:'power', energyLabel:'Electricity', energyPerYear:70, maint:30,
+    repairs:[{year:9,label:'New battery packs',amt:700,battery:true}],
+    end:{label:'Sold back to a dealer',amt:-100},
+    hidden:[
+      {l:'Mining and making the batteries',a:350,who:'Mining communities far from campus'},
+      {l:'Power plant emissions from charging',a:180,who:'Everyone, and future generations'},
+      {l:'Old batteries needing safe disposal',a:170,who:'Future campus and the town landfill'}
+    ]},
+  { id:'used', name:'Used diesel shuttles', short:'Used diesel',
+    price:700, priceNote:'$700k', blurb:'Three years old. Lowest sticker price.',
+    setup:0, setupLabel:'', energy:'fuel', energyLabel:'Fuel', energyPerYear:190, maint:90,
+    repairs:[{year:4,label:'Major repairs',amt:300},{year:9,label:'Major repairs',amt:300}],
+    end:{label:'Disposal fees',amt:40},
+    hidden:[
+      {l:'Fumes near dorms and classrooms',a:960,who:'Students, staff and neighbors (health)'},
+      {l:'Carbon emissions',a:600,who:'Everyone, and future generations'}
+    ]}
+];
+
+var EVENTS = [
+  {id:'fuel', text:'Fuel prices jump 40% from year 5.', energy:'fuel', mult:1.4},
+  {id:'power', text:'Electricity rates jump 40% from year 5.', energy:'power', mult:1.4},
+  {id:'calm', text:'A calm decade. Prices hold steady.', energy:null, mult:1}
+];
+
+var STEP_NAMES = ['Pick','Your bill','Unbilled','Decide'];
+var STAGE_BUTTONS = ['Run it: years 1 to 12','Fix it','Retire it','See my total'];
+
+var app = document.getElementById('app');
+var stepsEl = document.getElementById('steps');
+var state = fresh();
+
+function fresh(){
+  return { screen:'intro', pick:null, stage:0,
+    ev:EVENTS[Math.floor(Math.random()*EVENTS.length)],
+    weight:0, battery:true, finalPick:null, mind:'', disagree:'' };
+}
+
+/* ---------- math ---------- */
+function optById(id){ for(var i=0;i<OPTIONS.length;i++){ if(OPTIONS[i].id===id) return OPTIONS[i]; } return null; }
+function sum(rows){ var t=0; for(var i=0;i<rows.length;i++) t+=rows[i].a; return t; }
+function energyCost(o){
+  var t=0;
+  for(var y=1;y<=YEARS;y++){
+    var m = (state.ev.energy===o.energy && y>=EVENT_YEAR) ? state.ev.mult : 1;
+    t += o.energyPerYear*m;
+  }
+  return Math.round(t);
+}
+function ledger(o){
+  var buy=[{l:'Purchase price (10 shuttles)',a:o.price}];
+  if(o.setup) buy.push({l:o.setupLabel,a:o.setup});
+  var run=[{l:o.energyLabel+', 12 years',a:energyCost(o)},{l:'Routine maintenance, 12 years',a:o.maint*YEARS}];
+  var fix=[];
+  o.repairs.forEach(function(r){ if(state.battery || !r.battery) fix.push({l:r.label+' (year '+r.year+')',a:r.amt}); });
+  if(!fix.length) fix.push({l:'No major repairs expected',a:0});
+  var end=[{l:o.end.label,a:o.end.amt}];
+  var groups=[{title:'Buy it',rows:buy},{title:'Run it',rows:run},{title:'Fix it',rows:fix},{title:'Retire it',rows:end}];
+  var total=0; groups.forEach(function(g){ g.sub=sum(g.rows); total+=g.sub; });
+  return {groups:groups,total:total};
+}
+function hiddenTotal(o){ return sum(o.hidden); }
+function totalAt(o){ return ledger(o).total + Math.round(hiddenTotal(o)*state.weight/100); }
+function ranked(fn){ return OPTIONS.slice().sort(function(a,b){ return fn(a)-fn(b); }); }
+function fmt(k){
+  var neg = k<0, a=Math.abs(k), s;
+  if(a>=1000) s='$'+(a/1000).toFixed(2)+'M'; else s='$'+Math.round(a)+'k';
+  return neg ? '-'+s : s;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+/* ---------- shell ---------- */
+function setSteps(n){
+  if(!n){ stepsEl.hidden=true; return; }
+  stepsEl.hidden=false;
+  stepsEl.innerHTML = STEP_NAMES.map(function(s,i){
+    var c = (i+1<n)?'done':(i+1===n?'now':'');
+    return '<li class="'+c+'"'+(i+1===n?' aria-current="step"':'')+'>'+(i+1)+'. '+s+'</li>';
+  }).join('');
+}
+function show(html, stepNo, focusSel){
+  app.innerHTML = html;
+  setSteps(stepNo);
+  var f = app.querySelector(focusSel||'h1,h2');
+  if(f){ f.setAttribute('tabindex','-1'); try{ f.focus({preventScroll:true}); }catch(e){} }
+  window.scrollTo(0,0);
+}
+function on(sel, ev, fn){ var el=app.querySelector(sel); if(el) el.addEventListener(ev,fn); }
+
+/* ---------- screens ---------- */
+function intro(){
+  state.screen='intro';
+  show(
+    '<h1>What does it really cost?</h1>'+
+    '<p class="lead">Your university needs 10 new campus shuttles. They will run for the next 12 years.</p>'+
+    '<div class="card"><h3>Your job</h3>'+
+    '<p>Pick one of three options. Then see the bill the university pays, and the bill nobody sends.</p>'+
+    '<p class="muted small" style="margin:0">About 5 to 10 minutes. No right answer is handed to you.</p></div>'+
+    '<button class="btn" id="go">Start</button>', 0, 'h1');
+  on('#go','click',pickScreen);
+}
+
+function pickScreen(){
+  state.screen='pick';
+  var cards = OPTIONS.map(function(o){
+    return '<label class="opt"><input type="radio" name="pick" value="'+o.id+'"'+(state.pick===o.id?' checked':'')+'>'+
+      '<span class="face"><span class="nm"><span>'+esc(o.name)+'</span><span class="price">'+esc(o.priceNote)+'</span></span>'+
+      '<span class="ds">'+esc(o.blurb)+'</span></span></label>';
+  }).join('');
+  show('<h2>Which will you buy?</h2>'+
+    '<p class="muted">Prices shown are the sticker price for all 10 shuttles. Choose the one you think costs the university least over 12 years.</p>'+
+    '<div class="opts" role="radiogroup" aria-label="Shuttle options">'+cards+'</div>'+
+    '<button class="btn" id="buy"'+(state.pick?'':' disabled')+'>Buy it</button>', 1);
+  app.querySelectorAll('input[name=pick]').forEach(function(r){
+    r.addEventListener('change',function(){ state.pick=r.value; app.querySelector('#buy').disabled=false; });
+  });
+  on('#buy','click',function(){ if(!state.pick) return; state.stage=1; billScreen(); });
+}
+
+function billScreen(){
+  state.screen='bill';
+  var o=optById(state.pick), L=ledger(o);
+  var shown=L.groups.slice(0,state.stage), running=0;
+  shown.forEach(function(g){ running+=g.sub; });
+  var html='<h2>The bill the university pays</h2>'+
+    '<p class="muted">'+esc(o.name)+', over '+YEARS+' years.</p>'+
+    '<div class="runtotal" aria-live="polite"><span class="lbl">Running total</span><span class="num">'+fmt(running)+'</span></div>';
+  shown.forEach(function(g,i){
+    var last = i===shown.length-1;
+    html+='<section class="group'+(last?' new':'')+'"><h3><span>'+esc(g.title)+'</span><span>'+fmt(g.sub)+'</span></h3>'+
+      g.rows.map(function(r){ return '<div class="line"><span>'+esc(r.l)+'</span><b>'+fmt(r.a)+'</b></div>'; }).join('');
+    if(g.title==='Run it'){
+      html+='<div class="event"><b>Event:</b> '+esc(state.ev.text)+'</div>';
+    }
+    html+='</section>';
+  });
+  if(state.stage<4){
+    html+='<button class="btn" id="next">'+STAGE_BUTTONS[state.stage-1+0]+'</button>';
+    show(html,2,'h2');
+    on('#next','click',function(){ state.stage++; billScreen(); });
+    app.querySelector('#next').scrollIntoView({block:'end'});
+    return;
+  }
+  var order=ranked(function(x){return ledger(x).total;});
+  var myRank=order.indexOf(o)+1;
+  html+='<div class="card"><h3>What each option costs the university</h3><ol class="rank">'+
+    order.map(function(x,i){
+      return '<li><span>'+(i+1)+'. '+esc(x.name)+(x===o?'<span class="tag">Your pick</span>':'')+'</span><b>'+fmt(ledger(x).total)+'</b></li>';
+    }).join('')+'</ol>'+
+    '<p class="muted small" style="margin:10px 0 0">Your pick ranks '+myRank+' of 3 on what the university pays.</p></div>'+
+    '<button class="btn" id="hid">Next: the bill nobody sends</button>';
+  show(html,2,'h2');
+  on('#hid','click',hiddenScreen);
+}
+
+function hiddenScreen(){
+  state.screen='hidden';
+  var order=[optById(state.pick)].concat(OPTIONS.filter(function(x){return x.id!==state.pick;}));
+  var html='<h2>The bill nobody sends</h2>'+
+    '<p class="muted">The university never pays these. Someone else does. Estimates, in the same dollars.</p>';
+  order.forEach(function(o){
+    html+='<section class="card hcard"><h3><span>'+esc(o.name)+(o.id===state.pick?'<span class="tag">Your pick</span>':'')+'</span><span style="color:var(--hidden)">'+fmt(hiddenTotal(o))+'</span></h3>'+
+      o.hidden.map(function(r){
+        return '<div class="hline"><div class="top"><span>'+esc(r.l)+'</span><b>'+fmt(r.a)+'</b></div>'+
+          '<div class="who">Paid by: <span>'+esc(r.who)+'</span></div></div>';
+      }).join('')+'</section>';
+  });
+  html+='<button class="btn" id="dec">Decide what counts</button>';
+  show(html,3,'h2');
+  on('#dec','click',decideScreen);
+}
+
+function decideScreen(){
+  state.screen='decide';
+  var html='<h2>Decide what counts</h2>'+
+    '<p class="muted">Those costs are real, but nobody bills them. Counting them is a judgment call. You choose how much.</p>'+
+    '<div class="ctl"><div class="lab"><label for="w">Count unbilled costs at</label><output id="wout" for="w">'+state.weight+'%</output></div>'+
+    '<input id="w" type="range" min="0" max="100" step="5" value="'+state.weight+'" aria-describedby="whint">'+
+    '<div class="small muted" id="whint">0% ignores them. 100% counts them in full.</div></div>'+
+    '<fieldset class="ctl" style="border:0;padding:0;margin:0 0 16px"><legend class="lab" style="padding:0;width:100%">Electric battery packs</legend>'+
+    '<div class="seg2"><label><input type="radio" name="bat" value="1"'+(state.battery?' checked':'')+'><span class="face">Need replacing in year 9</span></label>'+
+    '<label><input type="radio" name="bat" value="0"'+(state.battery?'':' checked')+'><span class="face">Last all 12 years</span></label></div></fieldset>'+
+    '<div class="legend"><span><i class="sw buyer"></i>University pays</span><span><i class="sw hid"></i>Unbilled, as you count it</span></div>'+
+    '<div id="chart"></div><div class="verdict" id="verdict" aria-live="polite"></div>'+
+    '<h3>Your final call</h3><div class="opts" role="radiogroup" aria-label="Final choice" id="final"></div>'+
+    '<button class="btn" id="done"'+(state.finalPick?'':' disabled')+'>Write my summary</button>';
+  show(html,4,'h2');
+  var scale=0;
+  OPTIONS.forEach(function(o){ scale=Math.max(scale, ledger(o).total+hiddenTotal(o)); });
+  state._scaleBase = scale;
+  drawFinal();
+  paintChart();
+  on('#w','input',function(e){ state.weight=+e.target.value; app.querySelector('#wout').textContent=state.weight+'%'; paintChart(); });
+  app.querySelectorAll('input[name=bat]').forEach(function(r){
+    r.addEventListener('change',function(){
+      state.battery = r.value==='1';
+      /* recompute scale: battery changes buyer totals */
+      var s=0; OPTIONS.forEach(function(o){ s=Math.max(s, ledger(o).total+hiddenTotal(o)); });
+      state._scaleBase=s; paintChart(); drawFinal();
+    });
+  });
+  on('#done','click',summaryScreen);
+}
+
+function drawFinal(){
+  var box=app.querySelector('#final'); if(!box) return;
+  box.innerHTML = OPTIONS.map(function(o){
+    return '<label class="opt"><input type="radio" name="fin" value="'+o.id+'"'+(state.finalPick===o.id?' checked':'')+'>'+
+      '<span class="face"><span class="nm"><span>'+esc(o.name)+(o.id===state.pick?'<span class="tag">First pick</span>':'')+'</span></span></span></label>';
+  }).join('');
+  box.querySelectorAll('input').forEach(function(r){
+    r.addEventListener('change',function(){ state.finalPick=r.value; app.querySelector('#done').disabled=false; });
+  });
+}
+
+function paintChart(){
+  var order=ranked(totalAt), best=order[0], chart=app.querySelector('#chart'), scale=state._scaleBase||1;
+  chart.innerHTML = OPTIONS.map(function(o){
+    var L=ledger(o).total, H=Math.round(hiddenTotal(o)*state.weight/100), T=L+H;
+    var bw=Math.max(0,L)/scale*100, hw=H/scale*100;
+    return '<div class="crow'+(o===best?' best':'')+'"><div class="cname"><span>'+esc(o.name)+(o===best?'<span class="tag">Lowest</span>':'')+'</span>'+
+      '<span class="cval">'+fmt(T)+'</span></div>'+
+      '<div class="bar" role="img" aria-label="'+esc(o.name)+': university pays '+fmt(L)+', unbilled counted '+fmt(H)+', total '+fmt(T)+'">'+
+      '<span class="seg buyer" style="width:'+bw.toFixed(2)+'%"></span><span class="seg hid" style="width:'+hw.toFixed(2)+'%"></span></div></div>';
+  }).join('');
+  var gap=totalAt(order[1])-totalAt(order[0]);
+  var v='At these settings, '+best.name+' costs least: '+fmt(totalAt(best))+'. Next is '+order[1].name+', '+fmt(gap)+' behind.';
+  if(gap<=Math.round(0.03*totalAt(best))) v+=' That is a close call.';
+  app.querySelector('#verdict').textContent=v;
+}
+
+function summaryScreen(){
+  state.screen='summary';
+  var html='<h2>Your summary</h2>'+
+    '<p class="muted">Add two lines. Then copy it for class.</p>'+
+    '<div class="ctl"><label class="lab" for="mind" style="display:block">What changed your mind, or why it did not?</label><textarea id="mind" maxlength="400"></textarea></div>'+
+    '<div class="ctl"><label class="lab" for="dis" style="display:block">A classmate might disagree because...</label><textarea id="dis" maxlength="400"></textarea></div>'+
+    '<pre class="out" id="out"></pre>'+
+    '<button class="btn" id="copy">Copy summary</button><div class="status" id="status" role="status"></div>'+
+    '<div class="row-btns" style="margin-top:10px"><button class="btn ghost" id="again">Play again</button></div>';
+  show(html,4,'h2');
+  app.querySelector('#mind').value=state.mind;
+  app.querySelector('#dis').value=state.disagree;
+  paintSummary();
+  on('#mind','input',function(e){ state.mind=e.target.value; paintSummary(); });
+  on('#dis','input',function(e){ state.disagree=e.target.value; paintSummary(); });
+  on('#copy','click',copySummary);
+  on('#again','click',function(){ state=fresh(); intro(); });
+}
+
+function summaryText(){
+  var o=optById(state.pick), f=optById(state.finalPick), order=ranked(totalAt), best=order[0];
+  var buyerRank=ranked(function(x){return ledger(x).total;}).indexOf(o)+1;
+  var blank=function(s){ s=(s||'').trim(); return s?s:'(not filled in)'; };
+  return [
+    'THE CAMPUS FLEET: MY RESULT',
+    'First pick: '+o.name,
+    'What the university pays for it: '+fmt(ledger(o).total)+' over '+YEARS+' years (ranks '+buyerRank+' of 3)',
+    'Event in my run: '+state.ev.text,
+    'Unbilled costs counted at: '+state.weight+'%',
+    'Electric battery packs: '+(state.battery?'need replacing in year 9':'last all 12 years'),
+    'Lowest total at my settings: '+best.name+' ('+fmt(totalAt(best))+')',
+    'My final choice: '+f.name+(f===o?' (same as first pick)':' (changed from first pick)'),
+    'What changed my mind, or why not: '+blank(state.mind),
+    'A classmate might disagree because: '+blank(state.disagree),
+    'My own judgment (most sure of, least sure of): '
+  ].join('\n');
+}
+function paintSummary(){ app.querySelector('#out').textContent=summaryText(); }
+
+function copySummary(){
+  var text=summaryText(), st=app.querySelector('#status');
+  function ok(){ st.textContent='Copied.'; }
+  function fallback(){
+    var ta=document.createElement('textarea'); ta.value=text; ta.setAttribute('readonly','');
+    ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select();
+    var done=false; try{ done=document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    if(done) ok(); else { st.style.color='var(--hidden)'; st.textContent='Copy failed. Select the text above and copy it by hand.'; }
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(ok,fallback);
+  } else fallback();
+}
+
+window.__game = { OPTIONS:OPTIONS, EVENTS:EVENTS, state:function(){return state;}, ledger:ledger, hiddenTotal:hiddenTotal, totalAt:totalAt, ranked:ranked, fmt:fmt, summaryText:summaryText };
+intro();
+})();
+</script>
+</body>
+</html>
